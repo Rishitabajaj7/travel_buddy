@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'app_theme.dart';
-import 'message.dart';
+import 'bottom_navigation.dart';
+import 'destination.dart';
+import 'message_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final String username;
@@ -12,7 +14,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  static const categories = [
+  static const List<String> categories = [
     'Asia',
     'Europe',
     'North America',
@@ -20,7 +22,8 @@ class _HomeScreenState extends State<HomeScreen> {
     'Africa',
     'Australia',
   ];
-  static const destinations = <String, List<Destination>>{
+
+  static const Map<String, List<Destination>> destinations = {
     'Asia': [
       Destination('Japan', 'Tokyo', 4.9, 842, Icons.location_city),
       Destination('India', 'Jaipur', 4.8, 653, Icons.temple_hindu),
@@ -59,13 +62,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final name = widget.username.trim().isEmpty ? 'there' : widget.username.trim();
-    final list = destinations[categories[selectedCategory]]!;
+    final list = destinations[categories[selectedCategory]] ?? const [];
+
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             const SizedBox(height: 8),
-            _Header(name),
+            _Header(name: name),
             const SizedBox(height: 18),
             const _SearchBar(),
             const SizedBox(height: 22),
@@ -81,45 +85,55 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 12),
             SizedBox(
-              height: 34,
+              height: 36,
               child: ListView.separated(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 scrollDirection: Axis.horizontal,
                 itemCount: categories.length,
                 separatorBuilder: (context, index) => const SizedBox(width: 8),
-                itemBuilder: (context, index) => GestureDetector(
-                  onTap: () => setState(() {
-                    selectedCategory = index;
-                    selectedCard = 0;
-                  }),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: selectedCategory == index ? AppColors.dark : Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      categories[index],
-                      style: TextStyle(
-                        color: selectedCategory == index ? Colors.white : Colors.black54,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                itemBuilder: (context, index) {
+                  final selected = selectedCategory == index;
+                  return GestureDetector(
+                    onTap: () => setState(() {
+                      selectedCategory = index;
+                      selectedCard = 0;
+                    }),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: selected ? AppColors.dark : Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Text(
+                        categories[index],
+                        style: TextStyle(
+                          color: selected ? Colors.white : Colors.black54,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 14),
             Expanded(
-              child: PageView.builder(
-                controller: PageController(viewportFraction: .86, initialPage: selectedCard),
-                itemCount: list.length,
-                onPageChanged: (index) => setState(() => selectedCard = index),
-                itemBuilder: (context, index) => Padding(
-                  padding: const EdgeInsets.only(left: 20, right: 8, bottom: 8),
-                  child: DestinationCard(destination: list[index]),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 2),
+                child: PageView.builder(
+                  controller: PageController(
+                    viewportFraction: 0.84,
+                    initialPage: 0,
+                  ),
+                  itemCount: list.length,
+                  onPageChanged: (index) => setState(() => selectedCard = index),
+                  itemBuilder: (context, index) => Padding(
+                    padding: const EdgeInsets.only(left: 20, right: 8, bottom: 8),
+                    child: DestinationCard(destination: list[index]),
+                  ),
                 ),
               ),
             ),
@@ -135,69 +149,98 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class Destination {
-  final String country;
-  final String city;
-  final double rating;
-  final int reviews;
-  final IconData icon;
-  const Destination(this.country, this.city, this.rating, this.reviews, this.icon);
-}
-
 class _Header extends StatelessWidget {
   final String name;
-  const _Header(this.name);
+  const _Header({required this.name});
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  RichText(
-                    text: TextSpan(
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
-                      children: [
-                        const TextSpan(text: 'Hey, '),
-                        TextSpan(text: '$name!', style: const TextStyle(color: AppColors.coral)),
-                      ],
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                RichText(
+                  text: TextSpan(
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
                     ),
+                    children: [
+                      const TextSpan(text: 'Hello, '),
+                      TextSpan(
+                        text: name,
+                        style: const TextStyle(color: Colors.black87),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 2),
-                  const Text('Welcome to Travel Buddy', style: TextStyle(color: Colors.black54, fontSize: 11)),
-                ],
-              ),
+                ),
+                const SizedBox(height: 2),
+                const Text(
+                  'Welcome to TripGlide',
+                  style: TextStyle(color: Colors.black54, fontSize: 12),
+                ),
+              ],
             ),
-            const CircleAvatar(radius: 19, backgroundColor: AppColors.teal, child: Icon(Icons.person, color: Colors.white)),
-          ],
-        ),
-      );
+          ),
+          const CircleAvatar(
+            radius: 19,
+            backgroundColor: AppColors.teal,
+            child: Icon(Icons.person, color: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _SearchBar extends StatelessWidget {
   const _SearchBar();
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Row(
-          children: [
-            Expanded(
-              child: Container(
-                height: 44,
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
-                child: const Row(children: [Icon(Icons.search, color: Colors.black54, size: 21), SizedBox(width: 9), Text('Search', style: TextStyle(color: Colors.black45, fontSize: 12))]),
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              height: 44,
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.search, color: Colors.black54, size: 21),
+                  SizedBox(width: 9),
+                  Text(
+                    'Search',
+                    style: TextStyle(color: Colors.black45, fontSize: 12),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: 10),
-            Container(width: 44, height: 44, decoration: const BoxDecoration(color: AppColors.dark, shape: BoxShape.circle), child: const Icon(Icons.tune, color: Colors.white, size: 19)),
-          ],
-        ),
-      );
+          ),
+          const SizedBox(width: 10),
+          Container(
+            width: 44,
+            height: 44,
+            decoration: const BoxDecoration(
+              color: AppColors.dark,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.tune, color: Colors.white, size: 19),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class DestinationCard extends StatelessWidget {
@@ -205,39 +248,159 @@ class DestinationCard extends StatelessWidget {
   const DestinationCard({super.key, required this.destination});
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-        onTap: () => openPage(context, DestinationDetailsScreen(destination: destination)),
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => openPage(
+        context,
+        DestinationDetailsScreen(destination: destination),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
         child: Container(
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .12), blurRadius: 16, offset: const Offset(0, 8))]),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
           child: Column(
             children: [
               Expanded(
                 child: Stack(
                   children: [
-                    Container(width: double.infinity, decoration: const BoxDecoration(gradient: AppColors.backgroundGradient, borderRadius: BorderRadius.vertical(top: Radius.circular(24))), child: Center(child: Icon(destination.icon, color: Colors.white24, size: 90))),
-                    Positioned(top: 13, right: 13, child: Container(width: 36, height: 36, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: const Icon(Icons.favorite_border, size: 18, color: AppColors.coral))),
+                    Container(
+                      width: double.infinity,
+                      decoration: const BoxDecoration(
+                        gradient: AppColors.backgroundGradient,
+                      ),
+                      child: Center(
+                        child: Icon(
+                          destination.icon,
+                          color: Colors.white24,
+                          size: 100,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.favorite_border,
+                          size: 18,
+                          color: AppColors.coral,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 16,
+                      bottom: 14,
+                      right: 16,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.circle, color: Colors.white, size: 8),
+                              const SizedBox(width: 6),
+                              Text(
+                                destination.country,
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  destination.city,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              const Icon(Icons.star, color: AppColors.yellow, size: 16),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${destination.rating}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${destination.reviews} reviews',
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 13, 18, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                decoration: const BoxDecoration(
+                  color: AppColors.dark,
+                ),
+                child: Row(
                   children: [
-                    Row(children: [const Icon(Icons.circle, color: AppColors.teal, size: 9), const SizedBox(width: 6), Text(destination.country, style: const TextStyle(color: Colors.black54, fontSize: 12))]),
-                    const SizedBox(height: 5),
-                    Row(children: [Expanded(child: Text(destination.city, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold))), const Icon(Icons.star, color: AppColors.yellow, size: 17), const SizedBox(width: 3), Text('${destination.rating}', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12))]),
-                    const SizedBox(height: 2),
-                    Text('${destination.reviews} reviews', style: const TextStyle(color: Colors.black38, fontSize: 11)),
+                    const Text(
+                      'See more',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.arrow_forward,
+                        size: 16,
+                        color: AppColors.dark,
+                      ),
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
-              Container(width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12), decoration: const BoxDecoration(color: AppColors.dark, borderRadius: BorderRadius.vertical(bottom: Radius.circular(24))), child: Row(children: [const Text('See more', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)), const Spacer(), Container(width: 32, height: 32, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: const Icon(Icons.arrow_forward, size: 16, color: AppColors.dark))])),
             ],
           ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 class DestinationDetailsScreen extends StatelessWidget {
@@ -245,57 +408,59 @@ class DestinationDetailsScreen extends StatelessWidget {
   const DestinationDetailsScreen({super.key, required this.destination});
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(destination.city)),
-        body: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-          children: [
-            Container(height: 250, decoration: BoxDecoration(borderRadius: BorderRadius.circular(24), gradient: AppColors.backgroundGradient), child: Center(child: Icon(destination.icon, size: 100, color: Colors.white70))),
-            const SizedBox(height: 22),
-            Text(destination.country, style: const TextStyle(color: Colors.black54, fontSize: 14)),
-            Text(destination.city, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            Row(children: [const Icon(Icons.star, color: AppColors.yellow), const SizedBox(width: 5), Text('${destination.rating} rating · ${destination.reviews} reviews')]),
-            const SizedBox(height: 20),
-            Text('About ${destination.city}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text('Discover local highlights, beautiful views, and memorable experiences in ${destination.city}. Build this destination into your next TripGlide adventure.', style: const TextStyle(color: Colors.black54, height: 1.55)),
-            const SizedBox(height: 24),
-            appButton(context, 'Plan this trip', onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Trip saved to your plans')))),
-          ],
-        ),
-      );
-}
-
-class BottomNavigation extends StatelessWidget {
-  final VoidCallback? onMessagesTap;
-  const BottomNavigation({super.key, this.onMessagesTap});
-
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Container(
-          height: 58,
-          padding: const EdgeInsets.symmetric(horizontal: 18),
-          decoration: BoxDecoration(color: AppColors.dark, borderRadius: BorderRadius.circular(30)),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(destination.city)),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+        children: [
+          Container(
+            height: 250,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              gradient: AppColors.backgroundGradient,
+            ),
+            child: Center(
+              child: Icon(destination.icon, size: 100, color: Colors.white70),
+            ),
+          ),
+          const SizedBox(height: 22),
+          Text(
+            destination.country,
+            style: const TextStyle(color: Colors.black54, fontSize: 14),
+          ),
+          Text(
+            destination.city,
+            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          Row(
             children: [
-              const _NavIcon(Icons.home_rounded, selected: true),
-              IconButton(onPressed: onMessagesTap, icon: const Icon(Icons.chat_bubble_outline, color: Colors.white)),
-              const _NavIcon(Icons.favorite_border),
-              const _NavIcon(Icons.grid_view_rounded),
+              const Icon(Icons.star, color: AppColors.yellow),
+              const SizedBox(width: 5),
+              Text('${destination.rating} rating · ${destination.reviews} reviews'),
             ],
           ),
-        ),
-      );
-}
-
-class _NavIcon extends StatelessWidget {
-  final IconData icon;
-  final bool selected;
-  const _NavIcon(this.icon, {this.selected = false});
-
-  @override
-  Widget build(BuildContext context) => Container(width: 38, height: 38, decoration: BoxDecoration(color: selected ? Colors.white : Colors.transparent, shape: BoxShape.circle), child: Icon(icon, color: selected ? AppColors.dark : Colors.white70, size: 20));
+          const SizedBox(height: 20),
+          Text(
+            'About ${destination.city}',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Discover local highlights, beautiful views, and memorable experiences in ${destination.city}. Build this destination into your next TripGlide adventure.',
+            style: const TextStyle(color: Colors.black54, height: 1.55),
+          ),
+          const SizedBox(height: 24),
+          appButton(
+            context,
+            'Plan this trip',
+            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Trip saved to your plans')),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

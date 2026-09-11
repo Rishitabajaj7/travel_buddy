@@ -41,14 +41,11 @@ class _LoginScreenState extends State<LoginScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(22, 10, 22, 24),
           children: [
-            Text(
-              'Welcome back',
-              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
-            ),
+            const Text('Welcome back', style: AppColors.loginTitle),
             const SizedBox(height: 8),
             const Text(
               'Tell us who is travelling with us today.',
-              style: TextStyle(color: Colors.black54, fontSize: 12),
+              style: AppColors.muted,
             ),
             const SizedBox(height: 30),
             _label('Your name'),
@@ -97,17 +94,9 @@ class _LoginScreenState extends State<LoginScreen> {
     return TextFormField(
       controller: controller,
       validator: validator,
-      style: const TextStyle(fontSize: 12),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(fontSize: 12, color: Colors.black45),
         prefixIcon: Icon(icon, size: 19),
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-          borderSide: BorderSide.none,
-        ),
       ),
     );
   }
