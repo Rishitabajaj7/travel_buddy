@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 
 import 'app_theme.dart';
 import 'bottom_navigation.dart';
@@ -57,8 +59,6 @@ class _HomeScreenState extends State<HomeScreen> {
   };
 
   int selectedCategory = 3;
-  int selectedCard = 0;
-
   @override
   Widget build(BuildContext context) {
     final name = widget.username.trim().isEmpty ? 'there' : widget.username.trim();
@@ -96,7 +96,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   return GestureDetector(
                     onTap: () => setState(() {
                       selectedCategory = index;
-                      selectedCard = 0;
                     }),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 180),
@@ -123,17 +122,28 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 2),
-                child: PageView.builder(
-                  controller: PageController(
-                    viewportFraction: 0.84,
-                    initialPage: 0,
-                  ),
-                  itemCount: list.length,
-                  onPageChanged: (index) => setState(() => selectedCard = index),
-                  itemBuilder: (context, index) => Padding(
-                    padding: const EdgeInsets.only(left: 20, right: 8, bottom: 8),
-                    child: DestinationCard(destination: list[index]),
-                  ),
+                child: KeyedSubtree(
+                  key: ValueKey(categories[selectedCategory]),
+                  child: CardSwiper(
+  cardsCount: list.length,
+  numberOfCardsDisplayed: 3,
+  isLoop: true,
+  maxAngle: 8,
+  scale: 0.94,
+  backCardOffset: const Offset(14, 10),
+  threshold: 80,
+  padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+  cardBuilder: (
+    context,
+    index,
+    percentThresholdX,
+    percentThresholdY,
+  ) {
+    return DestinationCard(
+      destination: list[index],
+    );
+  },
+),
                 ),
               ),
             ),
@@ -245,154 +255,235 @@ class _SearchBar extends StatelessWidget {
 
 class DestinationCard extends StatelessWidget {
   final Destination destination;
-  const DestinationCard({super.key, required this.destination});
+
+  const DestinationCard({
+    super.key,
+    required this.destination,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => openPage(
-        context,
-        DestinationDetailsScreen(destination: destination),
-      ),
+      onTap: () {
+        openPage(
+          context,
+          DestinationDetailsScreen(
+            destination: destination,
+          ),
+        );
+      },
       child: ClipRRect(
         borderRadius: BorderRadius.circular(28),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.dark,
+            borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
+                color: Colors.black.withValues(alpha: 0.18),
                 blurRadius: 18,
                 offset: const Offset(0, 8),
               ),
             ],
           ),
-          child: Column(
+          child: Stack(
+            fit: StackFit.expand,
             children: [
-              Expanded(
-                child: Stack(
+              // 1. Full background image
+              CachedNetworkImage(
+                imageUrl: destination.imageUrl,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+
+                placeholder: (context, url) {
+                  return Container(
+                    decoration: const BoxDecoration(
+                      gradient: AppColors.backgroundGradient,
+                    ),
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  );
+                },
+
+                errorWidget: (context, url, error) {
+                  return Container(
+                    decoration: const BoxDecoration(
+                      gradient: AppColors.backgroundGradient,
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.image_not_supported_outlined,
+                        color: Colors.white,
+                        size: 42,
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+              // 2. Dark overlay for readability
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.05),
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.78),
+                      ],
+                      stops: const [
+                        0.0,
+                        0.42,
+                        1.0,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // 3. Favourite button
+              Positioned(
+                top: 14,
+                right: 14,
+                child: Container(
+                  width: 42,
+                  height: 42,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.favorite_border,
+                    color: AppColors.coral,
+                    size: 21,
+                  ),
+                ),
+              ),
+
+              // 4. Country, city and rating
+              Positioned(
+                left: 18,
+                right: 18,
+                bottom: 72,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: double.infinity,
-                      decoration: const BoxDecoration(
-                        gradient: AppColors.backgroundGradient,
-                      ),
-                      child: Center(
-                        child: Icon(
-                          destination.icon,
-                          color: Colors.white24,
-                          size: 100,
-                        ),
+                    Text(
+                      destination.country,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    Positioned(
-                      top: 12,
-                      right: 12,
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.favorite_border,
-                          size: 18,
-                          color: AppColors.coral,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: 16,
-                      bottom: 14,
-                      right: 16,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.circle, color: Colors.white, size: 8),
-                              const SizedBox(width: 6),
-                              Text(
-                                destination.country,
-                                style: const TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  destination.city,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                              const Icon(Icons.star, color: AppColors.yellow, size: 16),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${destination.rating}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${destination.reviews} reviews',
+
+                    const SizedBox(height: 5),
+
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            destination.city,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 11,
+                              color: Colors.white,
+                              fontSize: 27,
+                              height: 1.05,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ],
+                        ),
+
+                        const SizedBox(width: 10),
+
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.star,
+                              color: AppColors.yellow,
+                              size: 17,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              destination.rating.toString(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 5),
+
+                    Text(
+                      '${destination.reviews} reviews',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
                       ),
                     ),
                   ],
                 ),
               ),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                decoration: const BoxDecoration(
-                  color: AppColors.dark,
-                ),
-                child: Row(
-                  children: [
-                    const Text(
-                      'See more',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
-                      ),
+
+              // 5. Bottom See More bar
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  height: 64,
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  decoration: const BoxDecoration(
+                    color: AppColors.dark,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(28),
+                      bottomRight: Radius.circular(28),
                     ),
-                    const Spacer(),
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
+                  ),
+                  child: Row(
+                    children: [
+                      const Text(
+                        'See more',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.arrow_forward,
-                        size: 16,
-                        color: AppColors.dark,
+
+                      const Spacer(),
+
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_forward,
+                          color: AppColors.dark,
+                          size: 20,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -414,14 +505,28 @@ class DestinationDetailsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
         children: [
-          Container(
-            height: 250,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              gradient: AppColors.backgroundGradient,
-            ),
-            child: Center(
-              child: Icon(destination.icon, size: 100, color: Colors.white70),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: CachedNetworkImage(
+              imageUrl: destination.imageUrl,
+              height: 250,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Container(
+                height: 250,
+                decoration: const BoxDecoration(
+                  gradient: AppColors.backgroundGradient,
+                ),
+                child: const Center(
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+              errorWidget: (context, url, error) => Container(
+                height: 250,
+                decoration: const BoxDecoration(
+                  gradient: AppColors.backgroundGradient,
+                ),
+                child: const Icon(Icons.image_not_supported_outlined),
+              ),
             ),
           ),
           const SizedBox(height: 22),
