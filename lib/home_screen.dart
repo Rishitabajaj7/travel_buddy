@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
+import 'package:slide_to_act/slide_to_act.dart';
 
 import 'app_theme.dart';
 import 'bottom_navigation.dart';
 import 'destination.dart';
+import 'destination_details_screen.dart';
 import 'message_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -445,46 +447,33 @@ class DestinationCard extends StatelessWidget {
               Positioned(
                 left: 0,
                 right: 0,
-                bottom: 0,
-                child: Container(
-                  height: 64,
+                bottom: 20,
+                child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 18),
-                  decoration: const BoxDecoration(
-                    color: AppColors.dark,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(28),
-                      bottomRight: Radius.circular(28),
+                  child: SlideAction(
+                    text: 'See more',
+                    outerColor: Colors.black87,
+                    innerColor: Colors.white,
+                    sliderButtonIcon: const Icon(
+                      Icons.arrow_forward,
+                      color: Colors.black87,
+                      size: 20,
                     ),
+                    borderRadius: 24,
+                    elevation: 0,
+                    height: 48,
+                    onSubmit: () {
+                      openPage(
+                        context,
+                        DestinationDetailsScreen(
+                          destination: destination,
+                        ),
+                      );
+                      return null;
+                    },
                   ),
-                  child: Row(
-                    children: [
-                      const Text(
-                        'See more',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
 
-                      const Spacer(),
-
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.arrow_forward,
-                          color: AppColors.dark,
-                          size: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              ),
               ),
             ],
           ),
@@ -494,75 +483,346 @@ class DestinationCard extends StatelessWidget {
   }
 }
 
-class DestinationDetailsScreen extends StatelessWidget {
+// Kept temporarily for backwards compatibility with older local references.
+// ignore: unused_element
+class _OldDestinationDetailsScreen extends StatelessWidget {
   final Destination destination;
-  const DestinationDetailsScreen({super.key, required this.destination});
+  // ignore: unused_element_parameter
+  const _OldDestinationDetailsScreen({super.key, required this.destination});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(destination.city)),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: CachedNetworkImage(
-              imageUrl: destination.imageUrl,
-              height: 250,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Container(
-                height: 250,
-                decoration: const BoxDecoration(
-                  gradient: AppColors.backgroundGradient,
+      body: SafeArea(
+        top: false,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            Stack(
+              children: [
+                SizedBox(
+                  height: 232,
+                  width: double.infinity,
+                  child: CachedNetworkImage(
+                    imageUrl: destination.imageUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => const DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: AppColors.backgroundGradient,
+                      ),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => const DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: AppColors.backgroundGradient,
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.image_not_supported_outlined,
+                          color: Colors.white,
+                          size: 40,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-                child: const Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                Positioned(
+                  top: 54,
+                  left: 18,
+                  child: _DetailsCircleButton(
+                    icon: Icons.arrow_back_ios_new,
+                    onTap: () => Navigator.pop(context),
+                  ),
                 ),
-              ),
-              errorWidget: (context, url, error) => Container(
-                height: 250,
-                decoration: const BoxDecoration(
-                  gradient: AppColors.backgroundGradient,
+                const Positioned(
+                  top: 54,
+                  right: 18,
+                  child: _DetailsCircleButton(icon: Icons.favorite_border),
                 ),
-                child: const Icon(Icons.image_not_supported_outlined),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              destination.city,
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.location_on,
+                                  color: Colors.green,
+                                  size: 15,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  destination.country,
+                                  style: const TextStyle(
+                                    color: Colors.black54,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 7,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.black12),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.star,
+                                  color: AppColors.yellow,
+                                  size: 13,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  destination.rating.toString(),
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            '${destination.reviews} reviews',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    ' ${destination.city}, often simply called ${destination.city}, is one of the most iconic cities, renowned for its beautiful views and unforgettable experiences.',
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.black54,
+                      fontSize: 12,
+                      height: 1.45,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  const Text(
+                    'Read more',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Upcoming tours',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'See all',
+                        style: TextStyle(
+                          color: Colors.black54,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 188,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      clipBehavior: Clip.none,
+                      children: [
+                        _TourCard(
+                          destination: destination,
+                          title: 'Iconic ${destination.city}',
+                          duration: '8 days',
+                          price: '\$659/person',
+                        ),
+                        _TourCard(
+                          destination: destination,
+                          title: '${destination.city} highlights',
+                          duration: '5 days',
+                          price: '\$489/person',
+                          imageAlignment: Alignment.centerRight,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DetailsCircleButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback? onTap;
+
+  const _DetailsCircleButton({required this.icon, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      shape: const CircleBorder(),
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: SizedBox(
+          width: 42,
+          height: 42,
+          child: Icon(icon, size: 19),
+        ),
+      ),
+    );
+  }
+}
+
+class _TourCard extends StatelessWidget {
+  final Destination destination;
+  final String title;
+  final String duration;
+  final String price;
+  final Alignment imageAlignment;
+
+  const _TourCard({
+    required this.destination,
+    required this.title,
+    required this.duration,
+    required this.price,
+    this.imageAlignment = Alignment.center,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 174,
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
-          const SizedBox(height: 22),
-          Text(
-            destination.country,
-            style: const TextStyle(color: Colors.black54, fontSize: 14),
-          ),
-          Text(
-            destination.city,
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          Row(
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(
             children: [
-              const Icon(Icons.star, color: AppColors.yellow),
-              const SizedBox(width: 5),
-              Text('${destination.rating} rating · ${destination.reviews} reviews'),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: CachedNetworkImage(
+                  imageUrl: destination.imageUrl,
+                  height: 92,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  alignment: imageAlignment,
+                ),
+              ),
+              Positioned(
+                top: 7,
+                right: 7,
+                child: Container(
+                  width: 30,
+                  height: 30,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.favorite_border, size: 17),
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 7),
           Text(
-            'About ${destination.city}',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 3),
           Text(
-            'Discover local highlights, beautiful views, and memorable experiences in ${destination.city}. Build this destination into your next TripGlide adventure.',
-            style: const TextStyle(color: Colors.black54, height: 1.55),
+            '$duration  ·  $price',
+            style: const TextStyle(color: Colors.black45, fontSize: 9),
           ),
-          const SizedBox(height: 24),
-          appButton(
-            context,
-            'Plan this trip',
-            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Trip saved to your plans')),
-            ),
+          const Spacer(),
+          Row(
+            children: [
+              const Icon(Icons.star, color: AppColors.dark, size: 13),
+              const SizedBox(width: 3),
+              Text(
+                '${destination.rating}   ${destination.reviews} reviews',
+                style: const TextStyle(color: Colors.black54, fontSize: 9),
+              ),
+              const Spacer(),
+              Container(
+                width: 30,
+                height: 30,
+                decoration: const BoxDecoration(
+                  color: AppColors.dark,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.arrow_forward,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+            ],
           ),
         ],
       ),
