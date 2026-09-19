@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'app_theme.dart';
 import 'destination.dart';
+import 'tour_details_screen.dart';
 
 class DestinationDetailsScreen extends StatelessWidget {
   final Destination destination;
@@ -18,9 +19,11 @@ class DestinationDetailsScreen extends StatelessWidget {
       backgroundColor: AppColors.pageBackground,
       body: SafeArea(
         top: false,
-        child: ListView(
-          padding: EdgeInsets.zero,
+        child: Stack(
           children: [
+            ListView(
+              padding: const EdgeInsets.only(bottom: 92),
+              children: [
             Stack(
               children: [
                 SizedBox(
@@ -170,15 +173,69 @@ class DestinationDetailsScreen extends StatelessWidget {
                           _TourCard(
                             info: _tourInfo(destination, 0),
                             destination: destination,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => TourDetailsScreen(
+                                    destination: destination,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                           _TourCard(
                             info: _tourInfo(destination, 1),
                             destination: destination,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => TourDetailsScreen(
+                                    destination: destination,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(height: 28),
                   ],
+                ),
+              ),
+            ),
+              ],
+            ),
+            Positioned(
+              left: 20,
+              right: 20,
+              bottom: 14,
+              child: SizedBox(
+                height: 54,
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.dark,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => TourDetailsScreen(
+                          destination: destination,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'Book my tour',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -297,27 +354,27 @@ _TourInfo _tourInfo(Destination destination, int index) {
   const tours = <String, List<_TourInfo>>{
     'Rio de Janeiro': [
       _TourInfo('Sugarloaf Sunrise', '4 days  ·  from \$559/person',
-          'https://images.unsplash.com/photo-1516306580123-e6e52b1b7b5f?auto=format&fit=crop&w=700&q=85'),
+          'https://images.unsplash.com/photo-1516306580123-e6e52b1b7b5f?auto=format&fit=crop&fm=jpg&w=700&q=80'),
       _TourInfo('Ilha Grande Escape', '6 days  ·  from \$729/person',
-          'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=700&q=85'),
+          'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&fm=jpg&w=700&q=80'),
     ],
     'Tokyo': [
       _TourInfo('Neon Nights', '5 days  ·  from \$899/person',
-          'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=700&q=85'),
+          'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&fm=jpg&w=700&q=80'),
       _TourInfo('Mount Fuji Trail', '7 days  ·  from \$1,099/person',
-          'https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=700&q=85'),
+          'https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&fm=jpg&w=700&q=80'),
     ],
     'Paris': [
       _TourInfo('Left Bank Stroll', '3 days  ·  from \$489/person',
-          'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=700&q=85'),
+          'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&fm=jpg&w=700&q=80'),
       _TourInfo('Versailles Day Trip', '5 days  ·  from \$679/person',
-          'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=700&q=85'),
+          'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&fm=jpg&w=700&q=80'),
     ],
     'New York': [
       _TourInfo('Manhattan Icons', '4 days  ·  from \$649/person',
-          'https://images.unsplash.com/photo-1496588152823-86ff7695e68f?auto=format&fit=crop&w=700&q=85'),
+          'https://images.unsplash.com/photo-1496588152823-86ff7695e68f?auto=format&fit=crop&fm=jpg&w=700&q=80'),
       _TourInfo('Brooklyn After Dark', '5 days  ·  from \$719/person',
-          'https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&fit=crop&w=700&q=85'),
+          'https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&fit=crop&fm=jpg&w=700&q=80'),
     ],
   };
 
@@ -330,90 +387,111 @@ _TourInfo _tourInfo(Destination destination, int index) {
       ? const _TourInfo(
           'Hidden Trails',
           '5 days  ·  from \$659/person',
-          'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=700&q=85',
+          'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&fm=jpg&w=700&q=80',
         )
       : const _TourInfo(
           'Coastal Escape',
           '7 days  ·  from \$789/person',
-          'https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=700&q=85',
+          'https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&fm=jpg&w=700&q=80',
         );
 }
 
 class _TourCard extends StatelessWidget {
   final _TourInfo info;
   final Destination destination;
+  final VoidCallback onTap;
 
-  const _TourCard({required this.info, required this.destination});
+  const _TourCard({
+    required this.info,
+    required this.destination,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 174,
-      margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: CachedNetworkImage(
-                  imageUrl: info.imageUrl,
-                  height: 95,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  alignment: Alignment.center,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        width: 174,
+        margin: const EdgeInsets.only(right: 12),
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: CachedNetworkImage(
+                    imageUrl: info.imageUrl,
+                    height: 95,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    alignment: Alignment.center,
+                  ),
                 ),
-              ),
-              const Positioned(
-                top: 7,
-                right: 7,
-                child: _RoundButton(icon: Icons.favorite_border),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-            Text(info.title,
+                const Positioned(
+                  top: 7,
+                  right: 7,
+                  child: _RoundButton(icon: Icons.favorite_border),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              info.title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: AppColors.dark,
                 fontSize: 14,
-                fontWeight: FontWeight.w800)),
-          const SizedBox(height: 2),
-            Text(info.subtitle,
-              style: const TextStyle(color: AppColors.dark, fontSize: 11)),
-          const Spacer(),
-          Row(
-            children: [
-              const Icon(Icons.star, size: 13),
-              const SizedBox(width: 3),
-              Text('${destination.rating}   ${destination.reviews} reviews',
-                  style: const TextStyle(color: AppColors.dark, fontSize: 10)),
-              const Spacer(),
-              Container(
-                width: 30,
-                height: 30,
-                decoration: const BoxDecoration(
-                    color: AppColors.dark, shape: BoxShape.circle),
-                child: const Icon(Icons.arrow_forward,
-                    color: Colors.white, size: 16),
+                fontWeight: FontWeight.w800,
               ),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(height: 2),
+            Text(
+              info.subtitle,
+              style: const TextStyle(color: AppColors.dark, fontSize: 11),
+            ),
+            const Spacer(),
+            Row(
+              children: [
+                const Icon(Icons.star, size: 13),
+                const SizedBox(width: 3),
+                Text(
+                  '${destination.rating}   ${destination.reviews} reviews',
+                  style: const TextStyle(color: AppColors.dark, fontSize: 10),
+                ),
+                const Spacer(),
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: const BoxDecoration(
+                    color: AppColors.dark,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.arrow_forward,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
