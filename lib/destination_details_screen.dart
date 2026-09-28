@@ -5,7 +5,7 @@ import 'app_theme.dart';
 import 'destination.dart';
 import 'tour_details_screen.dart';
 
-class DestinationDetailsScreen extends StatelessWidget {
+class DestinationDetailsScreen extends StatefulWidget {
   final Destination destination;
 
   const DestinationDetailsScreen({
@@ -14,7 +14,18 @@ class DestinationDetailsScreen extends StatelessWidget {
   });
 
   @override
+  State<DestinationDetailsScreen> createState() =>
+      _DestinationDetailsScreenState();
+}
+
+class _DestinationDetailsScreenState extends State<DestinationDetailsScreen> {
+  bool _isFavorite = false;
+  bool _isDescriptionExpanded = false;
+
+  @override
   Widget build(BuildContext context) {
+    final destination = widget.destination;
+
     return Scaffold(
       backgroundColor: AppColors.pageBackground,
       body: SafeArea(
@@ -24,188 +35,214 @@ class DestinationDetailsScreen extends StatelessWidget {
             ListView(
               padding: const EdgeInsets.only(bottom: 92),
               children: [
-            Stack(
-              children: [
-                SizedBox(
-                  height: 250,
-                  width: double.infinity,
-                  child: CachedNetworkImage(
-                    imageUrl: destination.imageUrl,
-                    fit: BoxFit.cover,
-                    placeholder: (_, __) => const DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: AppColors.backgroundGradient,
-                      ),
-                      child: Center(
-                        child: CircularProgressIndicator(color: Colors.white),
-                      ),
-                    ),
-                    errorWidget: (_, __, ___) => const DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: AppColors.backgroundGradient,
-                      ),
-                      child: Center(
-                        child: Icon(Icons.image_not_supported_outlined,
-                            color: Colors.white, size: 42),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 54,
-                  left: 18,
-                  child: _RoundButton(
-                    icon: Icons.arrow_back_ios_new,
-                    onTap: () => Navigator.pop(context),
-                  ),
-                ),
-                const Positioned(
-                  top: 54,
-                  right: 18,
-                  child: _RoundButton(icon: Icons.favorite_border),
-                ),
-              ],
-            ),
-            Transform.translate(
-              offset: const Offset(0, -28),
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(20, 22, 20, 28),
-                decoration: const BoxDecoration(
-                  color: AppColors.pageBackground,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Stack(
                   children: [
-                    Row(
+                    SizedBox(
+                      height: 250,
+                      width: double.infinity,
+                      child: CachedNetworkImage(
+                        imageUrl: destination.imageUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) => const DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: AppColors.backgroundGradient,
+                          ),
+                          child: Center(
+                            child:
+                                CircularProgressIndicator(color: Colors.white),
+                          ),
+                        ),
+                        errorWidget: (_, __, ___) => const DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: AppColors.backgroundGradient,
+                          ),
+                          child: Center(
+                            child: Icon(Icons.image_not_supported_outlined,
+                                color: Colors.white, size: 42),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 54,
+                      left: 18,
+                      child: _RoundButton(
+                        icon: Icons.arrow_back_ios_new,
+                        onTap: () => Navigator.pop(context),
+                      ),
+                    ),
+                    Positioned(
+                      top: 54,
+                      right: 18,
+                      child: _RoundButton(
+                        icon: _isFavorite
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        iconColor:
+                            _isFavorite ? AppColors.coral : Colors.black87,
+                        tooltip: _isFavorite
+                            ? 'Remove from favorites'
+                            : 'Add to favorites',
+                        onTap: () => setState(() => _isFavorite = !_isFavorite),
+                      ),
+                    ),
+                  ],
+                ),
+                Transform.translate(
+                  offset: const Offset(0, -28),
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(20, 22, 20, 28),
+                    decoration: const BoxDecoration(
+                      color: AppColors.pageBackground,
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(26)),
+                    ),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                destination.city,
-                                style: const TextStyle(
-                                  color: AppColors.dark,
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(Icons.location_on,
-                                      color: Colors.green, size: 15),
-                                  const SizedBox(width: 3),
-                                  Text(destination.country,
-                                      style: const TextStyle(
-                                          color: AppColors.dark, fontSize: 14)),
+                                  Text(
+                                    destination.city,
+                                    style: const TextStyle(
+                                      color: AppColors.dark,
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.location_on,
+                                          color: Colors.green, size: 15),
+                                      const SizedBox(width: 3),
+                                      Text(destination.country,
+                                          style: const TextStyle(
+                                              color: AppColors.dark,
+                                              fontSize: 14)),
+                                    ],
+                                  ),
                                 ],
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                _RatingChip(rating: destination.rating),
+                                const SizedBox(height: 5),
+                                Text('${destination.reviews} reviews',
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700)),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 17),
+                        Text(
+                          _isDescriptionExpanded
+                              ? '${destination.city} is a memorable place to explore, with distinctive local culture, beautiful scenery, and experiences worth planning a whole trip around. Discover neighborhood favorites, local landmarks, and scenic spots at your own pace.'
+                              : '${destination.city} is a memorable place to explore, with distinctive local culture, beautiful scenery, and experiences worth planning a whole trip around.',
+                          style: const TextStyle(
+                              color: AppColors.dark, fontSize: 14, height: 1.5),
+                        ),
+                        TextButton(
+                          onPressed: () => setState(() {
+                            _isDescriptionExpanded = !_isDescriptionExpanded;
+                          }),
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(0, 32),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            alignment: Alignment.centerLeft,
+                          ),
+                          child: Text(
+                            _isDescriptionExpanded ? 'Read less' : 'Read more',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          children: [
+                            _InfoPill(
+                              icon: Icons.wb_sunny_outlined,
+                              label: 'Best time to visit',
+                              value: 'Mar - Oct',
+                            ),
+                            const SizedBox(width: 8),
+                            _InfoPill(
+                              icon: Icons.explore_outlined,
+                              label: 'Travel style',
+                              value: 'Adventure',
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 23),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Upcoming tours',
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.w800)),
+                            const Text('See all',
+                                style: TextStyle(
+                                    color: Colors.black54,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700)),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          height: 191,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            clipBehavior: Clip.none,
+                            children: [
+                              _TourCard(
+                                info: _tourInfo(destination, 0),
+                                destination: destination,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => TourDetailsScreen(
+                                        destination: destination,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              _TourCard(
+                                info: _tourInfo(destination, 1),
+                                destination: destination,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => TourDetailsScreen(
+                                        destination: destination,
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            _RatingChip(rating: destination.rating),
-                            const SizedBox(height: 5),
-                            Text('${destination.reviews} reviews',
-                                style: const TextStyle(
-                                    fontSize: 13, fontWeight: FontWeight.w700)),
-                          ],
-                        ),
+                        const SizedBox(height: 28),
                       ],
                     ),
-                    const SizedBox(height: 17),
-                    Text(
-                      '${destination.city} is a memorable place to explore, with distinctive local culture, beautiful scenery, and experiences worth planning a whole trip around.',
-                      style: const TextStyle(
-                          color: AppColors.dark, fontSize: 14, height: 1.5),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Read more',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        _InfoPill(
-                          icon: Icons.wb_sunny_outlined,
-                          label: 'Best time to visit',
-                          value: 'Mar - Oct',
-                        ),
-                        const SizedBox(width: 8),
-                        _InfoPill(
-                          icon: Icons.explore_outlined,
-                          label: 'Travel style',
-                          value: 'Adventure',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 23),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Upcoming tours',
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.w800)),
-                        const Text('See all',
-                            style: TextStyle(
-                                color: Colors.black54,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700)),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      height: 191,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        clipBehavior: Clip.none,
-                        children: [
-                          _TourCard(
-                            info: _tourInfo(destination, 0),
-                            destination: destination,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => TourDetailsScreen(
-                                    destination: destination,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          _TourCard(
-                            info: _tourInfo(destination, 1),
-                            destination: destination,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => TourDetailsScreen(
-                                    destination: destination,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-                  ],
+                  ),
                 ),
-              ),
-            ),
               ],
             ),
             Positioned(
@@ -249,8 +286,15 @@ class DestinationDetailsScreen extends StatelessWidget {
 class _RoundButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onTap;
+  final Color iconColor;
+  final String? tooltip;
 
-  const _RoundButton({required this.icon, this.onTap});
+  const _RoundButton({
+    required this.icon,
+    this.onTap,
+    this.iconColor = Colors.black87,
+    this.tooltip,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -260,7 +304,14 @@ class _RoundButton extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         customBorder: const CircleBorder(),
-        child: SizedBox(width: 42, height: 42, child: Icon(icon, size: 18)),
+        child: Tooltip(
+          message: tooltip ?? '',
+          child: SizedBox(
+            width: 42,
+            height: 42,
+            child: Icon(icon, size: 18, color: iconColor),
+          ),
+        ),
       ),
     );
   }
@@ -284,7 +335,8 @@ class _RatingChip extends StatelessWidget {
           const Icon(Icons.star, color: AppColors.yellow, size: 13),
           const SizedBox(width: 3),
           Text(rating.toStringAsFixed(1),
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+              style:
+                  const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
         ],
       ),
     );

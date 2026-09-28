@@ -63,7 +63,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int selectedCategory = 3;
   @override
   Widget build(BuildContext context) {
-    final name = widget.username.trim().isEmpty ? 'there' : widget.username.trim();
+    final name =
+        widget.username.trim().isEmpty ? 'there' : widget.username.trim();
     final list = destinations[categories[selectedCategory]] ?? const [];
 
     return Scaffold(
@@ -127,25 +128,25 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: KeyedSubtree(
                   key: ValueKey(categories[selectedCategory]),
                   child: CardSwiper(
-  cardsCount: list.length,
-  numberOfCardsDisplayed: 3,
-  isLoop: true,
-  maxAngle: 8,
-  scale: 0.94,
-  backCardOffset: const Offset(14, 10),
-  threshold: 80,
-  padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-  cardBuilder: (
-    context,
-    index,
-    percentThresholdX,
-    percentThresholdY,
-  ) {
-    return DestinationCard(
-      destination: list[index],
-    );
-  },
-),
+                    cardsCount: list.length,
+                    numberOfCardsDisplayed: 3,
+                    isLoop: true,
+                    maxAngle: 8,
+                    scale: 0.94,
+                    backCardOffset: const Offset(14, 10),
+                    threshold: 80,
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                    cardBuilder: (
+                      context,
+                      index,
+                      percentThresholdX,
+                      percentThresholdY,
+                    ) {
+                      return DestinationCard(
+                        destination: list[index],
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -255,13 +256,22 @@ class _SearchBar extends StatelessWidget {
   }
 }
 
-class DestinationCard extends StatelessWidget {
+class DestinationCard extends StatefulWidget {
   final Destination destination;
 
   const DestinationCard({
     super.key,
     required this.destination,
   });
+
+  @override
+  State<DestinationCard> createState() => _DestinationCardState();
+}
+
+class _DestinationCardState extends State<DestinationCard> {
+  bool _isFavorite = false;
+
+  Destination get destination => widget.destination;
 
   @override
   Widget build(BuildContext context) {
@@ -297,7 +307,6 @@ class DestinationCard extends StatelessWidget {
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
-
                 placeholder: (context, url) {
                   return Container(
                     decoration: const BoxDecoration(
@@ -311,7 +320,6 @@ class DestinationCard extends StatelessWidget {
                     ),
                   );
                 },
-
                 errorWidget: (context, url, error) {
                   return Container(
                     decoration: const BoxDecoration(
@@ -361,10 +369,20 @@ class DestinationCard extends StatelessWidget {
                     color: Colors.white,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.favorite_border,
-                    color: AppColors.coral,
-                    size: 21,
+                  child: IconButton(
+                    tooltip: _isFavorite
+                        ? 'Remove from favorites'
+                        : 'Add to favorites',
+                    onPressed: () {
+                      setState(() {
+                        _isFavorite = !_isFavorite;
+                      });
+                    },
+                    icon: Icon(
+                      _isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: AppColors.coral,
+                      size: 21,
+                    ),
                   ),
                 ),
               ),
@@ -387,9 +405,7 @@ class DestinationCard extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-
                     const SizedBox(height: 5),
-
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
@@ -406,9 +422,7 @@ class DestinationCard extends StatelessWidget {
                             ),
                           ),
                         ),
-
                         const SizedBox(width: 10),
-
                         Row(
                           children: [
                             const Icon(
@@ -429,9 +443,7 @@ class DestinationCard extends StatelessWidget {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 5),
-
                     Text(
                       '${destination.reviews} reviews',
                       style: const TextStyle(
@@ -472,8 +484,7 @@ class DestinationCard extends StatelessWidget {
                       return null;
                     },
                   ),
-
-              ),
+                ),
               ),
             ],
           ),

@@ -14,6 +14,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  String _namePreview = '';
 
   @override
   void dispose() {
@@ -41,7 +42,12 @@ class _LoginScreenState extends State<LoginScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(22, 10, 22, 24),
           children: [
-            const Text('Welcome back', style: AppColors.loginTitle),
+            Text(
+              _namePreview.isEmpty
+                  ? 'Welcome back'
+                  : 'Welcome back, $_namePreview',
+              style: AppColors.loginTitle,
+            ),
             const SizedBox(height: 8),
             const Text(
               'Tell us who is travelling with us today.',
@@ -56,6 +62,9 @@ class _LoginScreenState extends State<LoginScreen> {
               (value) => value == null || value.trim().isEmpty
                   ? 'Please enter your name'
                   : null,
+              onChanged: (value) => setState(() {
+                _namePreview = value.trim();
+              }),
             ),
             const SizedBox(height: 16),
             _label('Email address'),
@@ -85,15 +94,13 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _field(
-    TextEditingController controller,
-    String hint,
-    IconData icon,
-    String? Function(String?) validator,
-  ) {
+  Widget _field(TextEditingController controller, String hint, IconData icon,
+      String? Function(String?) validator,
+      {ValueChanged<String>? onChanged}) {
     return TextFormField(
       controller: controller,
       validator: validator,
+      onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hint,
         prefixIcon: Icon(icon, size: 19),

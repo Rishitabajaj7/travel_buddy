@@ -3,8 +3,33 @@ import 'package:flutter/material.dart';
 import 'app_theme.dart';
 import 'login_screen.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
+
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  static const _slides = [
+    (
+      image:
+          'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=900&q=85',
+      caption: 'Your next view is waiting.',
+    ),
+    (
+      image:
+          'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=900&q=85',
+      caption: 'Find your kind of city.',
+    ),
+    (
+      image:
+          'https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=900&q=85',
+      caption: 'Make room for the unexpected.',
+    ),
+  ];
+
+  int _activeSlide = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -29,33 +54,59 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.network(
-                    'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=900&q=85',
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: AppColors.backgroundGradient,
-                      ),
-                    ),
-                  ),
-                  const Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Padding(
-                      padding: EdgeInsets.all(18),
-                      child: Text(
-                        'Your next view is waiting.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
+              child: PageView.builder(
+                itemCount: _slides.length,
+                onPageChanged: (index) => setState(() => _activeSlide = index),
+                itemBuilder: (context, index) {
+                  final slide = _slides[index];
+                  return Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.network(
+                        slide.image,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: AppColors.backgroundGradient,
+                          ),
                         ),
                       ),
-                    ),
+                      Align(
+                        alignment: Alignment.bottomLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.all(18),
+                          child: Text(
+                            slide.caption,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                _slides.length,
+                (index) => AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  width: _activeSlide == index ? 20 : 7,
+                  height: 7,
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  decoration: BoxDecoration(
+                    color: _activeSlide == index
+                        ? AppColors.dark
+                        : AppColors.dark.withValues(alpha: 0.22),
+                    borderRadius: BorderRadius.circular(4),
                   ),
-                ],
+                ),
               ),
             ),
             const SizedBox(height: 28),

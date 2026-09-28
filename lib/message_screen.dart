@@ -20,7 +20,7 @@ class MessagePreview {
   });
 }
 
-class MessagesScreen extends StatelessWidget {
+class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key});
 
   static const List<MessagePreview> conversations = [
@@ -59,7 +59,20 @@ class MessagesScreen extends StatelessWidget {
   ];
 
   @override
+  State<MessagesScreen> createState() => _MessagesScreenState();
+}
+
+class _MessagesScreenState extends State<MessagesScreen> {
+  bool _unreadOnly = false;
+
+  @override
   Widget build(BuildContext context) {
+    final visibleConversations = _unreadOnly
+        ? MessagesScreen.conversations
+            .where((conversation) => conversation.unread > 0)
+            .toList()
+        : MessagesScreen.conversations;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Messages')),
       body: ListView(
@@ -71,8 +84,29 @@ class MessagesScreen extends StatelessWidget {
             'Stay connected with hosts and travel friends.',
             style: AppColors.muted,
           ),
-          const SizedBox(height: 20),
-          ...conversations.map(
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            children: [
+              ChoiceChip(
+                label: const Text('All'),
+                selected: !_unreadOnly,
+                onSelected: (_) => setState(() => _unreadOnly = false),
+              ),
+              ChoiceChip(
+                label: const Text('Unread'),
+                selected: _unreadOnly,
+                onSelected: (_) => setState(() => _unreadOnly = true),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (visibleConversations.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: Center(child: Text('No unread conversations')),
+            ),
+          ...visibleConversations.map(
             (conversation) => _MessageTile(conversation: conversation),
           ),
         ],
