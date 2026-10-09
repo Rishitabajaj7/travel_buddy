@@ -4,7 +4,13 @@ import 'app_theme.dart';
 
 class BottomNavigation extends StatelessWidget {
   final VoidCallback? onMessagesTap;
-  const BottomNavigation({super.key, this.onMessagesTap});
+  final VoidCallback? onTravelBuddiesTap;
+
+  const BottomNavigation({
+    super.key,
+    this.onMessagesTap,
+    this.onTravelBuddiesTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +35,11 @@ class BottomNavigation extends StatelessWidget {
               ),
             ),
             const _NavIcon(icon: Icons.favorite_border),
-            const _NavIcon(icon: Icons.grid_view_rounded),
+            IconButton(
+              tooltip: 'Travel buddies',
+              onPressed: onTravelBuddiesTap,
+              icon: const Icon(Icons.people_outline, color: Colors.white),
+            ),
           ],
         ),
       ),

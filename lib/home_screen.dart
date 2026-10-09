@@ -8,6 +8,7 @@ import 'bottom_navigation.dart';
 import 'destination.dart';
 import 'destination_details_screen.dart';
 import 'message_screen.dart';
+import 'travel_buddies_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final String username;
@@ -153,6 +154,8 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 8),
             BottomNavigation(
               onMessagesTap: () => openPage(context, const MessagesScreen()),
+              onTravelBuddiesTap: () =>
+                  openPage(context, const TravelBuddiesScreen()),
             ),
             const SizedBox(height: 14),
           ],
